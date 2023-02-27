@@ -16,6 +16,23 @@ Reads Unicorn XML configuration files and converts them into SCS-compliant confi
     Descendants = 1 -shl 2
 }
 
+class EnumExtensions {
+    
+    static [System.Int32] Add([System.Int32] $opI, [System.Int32] $opII)
+    {
+        while ($opII -ne 0)
+        {
+            [System.Int32] $c = $opI -band $opII
+
+            $opI = $opI -bxor $opII
+
+            $opII = $c -shl 1
+        }
+        return $opI
+    }
+
+}
+
 class SerialzationItem {
     
     [System.String]
@@ -28,7 +45,7 @@ class SerialzationItem {
     $Database
 
     [System.Enum]
-    $Scope = [Scope]::Item -band [Scope]::Descendants
+    $Scope = [Scope]::Item + [Scope]::Descendants
 
     [System.Collections.ArrayList]
     $Rules = @()
