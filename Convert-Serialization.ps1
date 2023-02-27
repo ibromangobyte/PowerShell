@@ -143,12 +143,28 @@ class SerializationModule {
 
 
 function Convert-Serialization {
+    [CmdletBinding(DefaultParameterSetName='Path',
+                   PositionalBinding=$false,
+                   ConfirmImpact='Medium')]
     param (
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$true,
+                   Position=0,
+                   ParameterSetName = 'Path')]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $Path
     )
 
+    begin 
+    {
+        <# Tasks that are completed once #>
+    }
+
+    process
+    {
+        <# Routine tasks #>
+
+    }
 
 
 }
