@@ -6,8 +6,7 @@ Automates the configuration of content serialization configuration files.
 
 .DESCRIPTION
 
-This will find an existing Unicorn XML configuration file and convert it to an SCS-complaint configuration file.
-
+Reads Unicorn XML configuration files and converts them into an SCS-complaint configuration file.
 #>
 
 [Flags()] enum Scope
