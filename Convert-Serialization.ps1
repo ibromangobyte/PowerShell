@@ -173,7 +173,7 @@ function Read-Serialization {
         $Filter
     )
 
-    Get-ChildItem -Path $SourcePath -Filter $Filter -Recurse -ErrorAction SilentlyContinue | ForEach -Parallel {
+    Get-ChildItem -Path $SourcePath -Filter $Filter -Recurse | ForEach -Parallel {
         
         Write-Information "Reading serialization file at $($_.Directory.FullName) ..." -InformationAction Continue
         
