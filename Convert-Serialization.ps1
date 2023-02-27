@@ -8,6 +8,9 @@ Reads Unicorn XML configuration files and converts them into SCS-compliant confi
 
 #>
 
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
 [Flags()] enum Scope
 {
     Ignored = 0
@@ -179,7 +182,7 @@ function Read-Serialization {
         
         $configurationNode = (Select-Xml -Path $SourcePath -XPath /configuration/descendant::configuration).Node
 
-        Write-Output $configurationNode
+        Write-Output $configurationNode.predicate
 
     }
 
