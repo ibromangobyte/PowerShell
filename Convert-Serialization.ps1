@@ -1,4 +1,4 @@
-﻿<#
+<#
 
 .SYNOPSIS
 
@@ -10,6 +10,19 @@ This will force an automatic reboot and will pick up where it left off to
 complete the configuration.
 
 #>
+
+enum Scopes
+{
+    SingleItem = 0
+
+    ItemAndChildren = 1
+
+    ItemAndDescendants = 2
+
+    DescendantsOnly = 3
+
+    Ignored = 4
+}
 
 class SerialzationItem {
     
@@ -92,14 +105,6 @@ function Convert-Serialization {
         $Path
     )
 
-}
-
-Begin
-{
-}
-
-Process 
-{
 }
 
 class Constants {
