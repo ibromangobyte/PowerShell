@@ -1,5 +1,6 @@
-# PowerShell
+# PowerShell Repository
 
-## .NET PowerShell Script Repository
+## .NET PowerShell Script
 
-## Sitecore PowerShell Script Repository
+## Sitecore PowerShell Script
+> PowerShell scripts make use of multi-threading and is compatabile with PowerShell version 7 and above.
