@@ -45,7 +45,7 @@ class SerialzationItem {
     $Database
 
     [System.Enum]
-    $Scope = [Scope]::Item + [Scope]::Descendants
+    $Scope
 
     [System.Collections.ArrayList]
     $Rules = @()
@@ -57,9 +57,10 @@ class SerialzationItem {
         $this.Name = $name
         $this.Path = $path
         $this.Database = $database
+        $this.Scope = [EnumExtensions]::Add([Scope]::Item, [Scope]::Descendants)
     }
 
-    SerialzationItem([System.String] $name, [System.String] $path, [System.String] $database, [System.String] $scope)
+    SerialzationItem([System.String] $name, [System.String] $path, [System.String] $database, [System.Enum] $scope)
     {
         $this.Name = $name
         $this.Path = $path
@@ -67,7 +68,7 @@ class SerialzationItem {
         $this.Scope = $scope
     }
 
-    SerialzationItem([System.String] $name, [System.String] $path, [System.String] $database, [System.String] $scope, [System.Collections.ArrayList] $rules)
+    SerialzationItem([System.String] $name, [System.String] $path, [System.String] $database, [System.Enum] $scope, [System.Collections.ArrayList] $rules)
     {
         $this.Name = $name
         $this.Path = $path
@@ -106,7 +107,7 @@ class SerializationRules {
         $this.Scope = $scope
     }
 
-    SerializationRules([System.String] $path, [System.String] $scope, [System.String] $alias)
+    SerializationRules([System.String] $path, [System.Enum] $scope, [System.String] $alias)
     {
         $this.Path = $path
         $this.Scope = $scope
@@ -163,12 +164,23 @@ function Read-Serialization {
                    ParameterSetName='Path')]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Path
+        $SourcePath,
+        
+        [Parameter(Mandatory=$true,
+                   Position=1,
+                   ParameterSetName='Path')]
+        [ValidateNotNullOrEmpty]
+        [System.String]
+        $Filter
     )
 
-    Write-Information "Reading serialization file at $($Path)..." -InformationAction Continue
+    Write-Information "Reading serialization file at $($SourcePath)..." -InformationAction Continue
 
-    return (Select-Xml -Path $Path -XPath /)
+    Get-ChildItem -Path $SourcePath -Filter $Filter -Recurse | ForEach -Parallel {
+        
+    }
+
+    return (Select-Xml -Path $SourcePath -XPath /configuration/descendant::configuration).Node
 
 }
 
@@ -179,10 +191,10 @@ function Write-Serialization {
                    ParameterSetName='Path')]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Path
+        $DestinationPath
     )
 
-    Write-Information "Writing serialization file to $($Path)..." -InformationAction Continue
+    Write-Information "Writing serialization file to $($DestinationPath)..." -InformationAction Continue
 
 }
 
@@ -198,13 +210,29 @@ function Convert-Serialization {
                    ParameterSetName='Path')]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Path
+        $SourcePath,
+
+        [Parameter(Mandatory=$true,
+                   Position=0,
+                   ParameterSetName='Path')]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $DestinationPath,
+        
+        [Parameter(Mandatory=$true,
+                   Position=1,
+                   ParameterSetName='Path')]
+        [ValidateNotNullOrEmpty]
+        [System.String]
+        $Filter
+
     )
 
     begin 
     {
         <# Tasks that are completed once #>
-        Read-Serialization | ForEach -Parallel {
+
+        Read-Serialization -Path $SourcePath -Filter $Filter | ForEach -Parallel {
 
         }
 
