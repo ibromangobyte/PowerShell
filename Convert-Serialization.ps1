@@ -66,7 +66,7 @@ class SerialzationItem {
             return ($path -match [Constants]::PathRegexPattern)
         }
 
-        return false;
+        return $false;
     }
 }
 
@@ -79,23 +79,21 @@ class SerializationRules {
     $Scope
 
     [System.String]
-    $Alias
+    $Alias = [System.String]::Empty
 
     SerializationRules(){}
     
-    SerializationRules([System.String] $name, [System.String] $path, [System.String] $database)
+    SerializationRules([System.String] $path, [System.String] $scope)
     {
-        $this.Name = $name
         $this.Path = $path
-        $this.Database = $database
+        $this.Scope = $scope
     }
 
-    SerializationRules([System.String] $name, [System.String] $path, [System.String] $database, [System.Collections.ArrayList] $rules)
+    SerializationRules([System.String] $path, [System.String] $scope, [System.String] $alias)
     {
-        $this.Name = $name
         $this.Path = $path
-        $this.Database = $database
-        $this.Rules = $rules
+        $this.Scope = $scope
+        $this.Alias = $alias
     }
 
     [System.Boolean] IsValidPath([System.String] $path)
@@ -105,7 +103,7 @@ class SerializationRules {
             return ($path -match [Constants]::PathRegexPattern)
         }
 
-        return false;
+        return $false;
     }
 
 }
@@ -134,18 +132,49 @@ class SerializationModule {
     {
         if ($null -ne $items -and @($items).count -gt 0)
         {
-            return true;
+            return $true;
         }
 
-        return false;
+        return $false;
     }
+}
+
+function Read-Serialization {
+    param (
+        [Parameter(Mandatory=$true,
+                   Position=0,
+                   ParameterSetName='Path')]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Path
+    )
+
+    Write-Information "Reading serialization file at $($Path)..." -InformationAction Continue
+
+    return (Select-Xml -Path $Path -XPath /)
+
+}
+
+function Write-Serialization {
+    param (
+        [Parameter(Mandatory=$true,
+                   Position=0,
+                   ParameterSetName='Path')]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Path
+    )
+
+    Write-Information "Writing serialization file to $($Path)..." -InformationAction Continue
+
 }
 
 
 function Convert-Serialization {
     [CmdletBinding(DefaultParameterSetName='Path',
                    PositionalBinding=$false,
-                   ConfirmImpact='Medium')]
+                   SupportShouldProcess,
+                   ConfirmImpact='High')]
     param (
         [Parameter(Mandatory=$true,
                    Position=0,
@@ -158,6 +187,10 @@ function Convert-Serialization {
     begin 
     {
         <# Tasks that are completed once #>
+        Read-Serialization | ForEach -Parallel {
+
+        }
+
     }
 
     process
@@ -169,13 +202,6 @@ function Convert-Serialization {
 
 }
 
-Begin
-{
-}
-
-Process 
-{
-}
 
 class Constants {
     
