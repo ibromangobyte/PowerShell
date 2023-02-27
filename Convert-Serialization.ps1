@@ -33,7 +33,7 @@ class EnumExtensions {
 
 }
 
-class SerialzationItem {
+class SerializationItem {
     
     [System.String]
     $Name
@@ -50,17 +50,17 @@ class SerialzationItem {
     [System.Collections.ArrayList]
     $Rules = @()
 
-    SerialzationItem(){}
+    SerializationItem(){}
     
-    SerialzationItem([System.String] $name, [System.String] $path, [System.String] $database)
+    SerializationItem([System.String] $name, [System.String] $path, [System.String] $database)
     {
         $this.Name = $name
         $this.Path = $path
         $this.Database = $database
-        $this.Scope = [EnumExtensions]::Add([Scope]::Item, [Scope]::Descendants)
+        $this.Scope = [Scope]([EnumExtensions]::Add([Scope]::Item, [Scope]::Descendants))
     }
 
-    SerialzationItem([System.String] $name, [System.String] $path, [System.String] $database, [System.Enum] $scope)
+    SerializationItem([System.String] $name, [System.String] $path, [System.String] $database, [System.Enum] $scope)
     {
         $this.Name = $name
         $this.Path = $path
@@ -68,7 +68,7 @@ class SerialzationItem {
         $this.Scope = $scope
     }
 
-    SerialzationItem([System.String] $name, [System.String] $path, [System.String] $database, [System.Enum] $scope, [System.Collections.ArrayList] $rules)
+    SerializationItem([System.String] $name, [System.String] $path, [System.String] $database, [System.Enum] $scope, [System.Collections.ArrayList] $rules)
     {
         $this.Name = $name
         $this.Path = $path
@@ -139,11 +139,10 @@ class SerializationModule {
     
     SerializationModule(){}
     
-    SerializationModule([System.String] $namespace, [System.Collections.ArrayList] $references, [System.Collections.ArrayList] $items)
+    SerializationModule([System.String] $namespace, [System.Collections.ArrayList] $references)
     {
         $this.Namespace = $namespace
         $this.References = $references
-        $this.Items = $items
     }
     
     [System.Boolean] IsNotNullAndEmpty([System.Collections.ArrayList] $items)
@@ -174,10 +173,14 @@ function Read-Serialization {
         $Filter
     )
 
-    Write-Information "Reading serialization file at $($SourcePath)..." -InformationAction Continue
-
-    Get-ChildItem -Path $SourcePath -Filter $Filter -Recurse | ForEach -Parallel {
+    Get-ChildItem -Path $SourcePath -Filter $Filter -Recurse -ErrorAction SilentlyContinue | ForEach -Parallel {
         
+        Write-Information "Reading serialization file at $($_.Directory.FullName) ..." -InformationAction Continue
+        
+        $configurationNode = (Select-Xml -Path $SourcePath -XPath /configuration/descendant::configuration).Node
+
+        Write-Output $configurationNode
+
     }
 
     return (Select-Xml -Path $SourcePath -XPath /configuration/descendant::configuration).Node
@@ -213,14 +216,14 @@ function Convert-Serialization {
         $SourcePath,
 
         [Parameter(Mandatory=$true,
-                   Position=0,
+                   Position=1,
                    ParameterSetName='Path')]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $DestinationPath,
         
         [Parameter(Mandatory=$true,
-                   Position=1,
+                   Position=2,
                    ParameterSetName='Path')]
         [ValidateNotNullOrEmpty]
         [System.String]
