@@ -149,7 +149,7 @@ function Convert-Serialization {
     param (
         [Parameter(Mandatory=$true,
                    Position=0,
-                   ParameterSetName = 'Path')]
+                   ParameterSetName='Path')]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Path
