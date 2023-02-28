@@ -181,7 +181,7 @@ function Read-Serialization {
 
     Get-ChildItem -Path $SourcePath -Filter $Filter -Recurse | ForEach-Object {
         
-        Write-Information "Reading serialization file at $($_.Directory.FullName) ..." -InformationAction Continue
+        Write-Information -MessageData "Reading serialization file at $($_.Directory.FullName) ..." -InformationAction Continue
         
         [System.Xml.XmlElement] 
         $configurationElement = (Select-Xml -Path $_.FullName -XPath /configuration/descendant::configuration).Node
@@ -194,6 +194,11 @@ function Read-Serialization {
                     
             [SerializationItem] 
             $serializationItem = [SerializationItem]::new($_.Name, $_.Path, $_.Database)
+
+            if ($null -ne $_.Exclude)
+            {
+                $serializationItem.Scope = [Scope]::Item
+            }
              
             [System.Collections.ArrayList] 
             $serializationModule.Items.Add($serializationItem)
@@ -227,6 +232,10 @@ function Write-Serialization {
     )
 
     Write-Information "Writing serialization file to $($DestinationPath)..." -InformationAction Continue
+
+    [System.Collections.ArrayList] $Items | ForEach-Object {
+        
+    }
 
 }
 
@@ -262,14 +271,35 @@ function Convert-Serialization {
 
     begin 
     {
+        $Error.Clear()
 
-        Read-Serialization -SourcePath $SourcePath -Filter $Filter
+        try
+        {
+            if (-not [bool](Resolve-Path -Path "/vffgfdg" -ErrorAction Ignore))
+            {
+                throw (New-Object -TypeName System.IO.DirectoryNotFoundException -ArgumentList "Could not find path: $("/vffgfdg")")
+            }
+            if (-not [bool](Resolve-Path -Path "/vffgfdg" -ErrorAction Ignore))
+            {
+                throw (New-Object -TypeName System.IO.DirectoryNotFoundException -ArgumentList "Could not find path: $("/vffgfdg")")
+            }
+
+        }
+        catch [System.IO.DirectoryNotFoundException]
+        {
+            Write-Error "The source path or file was not found: $($PSItem.Exception)" -RecommendedAction "Enter valid path." -ErrorAction Stop
+        }
 
     }
 
     process
     {
-        Write-Serialization -DestinationPath $DestinationPath
+        Read-Serialization -SourcePath $SourcePath -Filter $Filter | Write-Serialization -DestinationPath $DestinationPath -Items $_
+    }
+
+    end
+    {
+        Write-Information -MessageData "Completed: See serialization files at the destination path:$($DestinationPath)." -InformationAction Stop
     }
 
 }
