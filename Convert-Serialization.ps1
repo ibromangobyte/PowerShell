@@ -145,7 +145,7 @@ class SerializationModule {
     SerializationModule([System.String] $namespace, [System.String] $references)
     {
         $this.Namespace = $namespace
-        $this.References = $references.Split([Constants]::UTF16Characters.Comma)
+        $this.References = $references.Split([Constants]::Delimiter.Default)
     }
     
     [System.Boolean] IsNotNullAndEmpty([System.Collections.ArrayList] $items)
@@ -177,7 +177,7 @@ function Read-Serialization {
     )
 
     [System.Collections.ArrayList] 
-    $configurationFiles = [System.Collections.ArrayList]@()
+    $serializationItems = [System.Collections.ArrayList]@()
 
     Get-ChildItem -Path $SourcePath -Filter $Filter -Recurse | ForEach -Parallel {
         
@@ -201,11 +201,11 @@ function Read-Serialization {
         }
 
         [System.Collections.ArrayList] 
-        $configurationFiles.Add($serializationModule)
+        $serializationItems.Add($serializationModule)
 
     }
 
-    return (Select-Xml -Path $SourcePath -XPath /configuration/descendant::configuration).Node
+    return $serializationItems
 
 }
 
@@ -216,7 +216,14 @@ function Write-Serialization {
                    ParameterSetName='Path')]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $DestinationPath
+        $DestinationPath,
+
+        [Parameter(Mandatory=$true,
+                   Position=1,
+                   ParameterSetName='Path')]
+        [ValidateNotNullOrEmpty()]
+        [System.Collections.ArrayList]
+        $Items
     )
 
     Write-Information "Writing serialization file to $($DestinationPath)..." -InformationAction Continue
@@ -255,20 +262,15 @@ function Convert-Serialization {
 
     begin 
     {
-        <# Tasks that are completed once #>
 
-        Read-Serialization -Path $SourcePath -Filter $Filter | ForEach -Parallel {
-
-        }
+        Read-Serialization -SourcePath $SourcePath -Filter $Filter
 
     }
 
     process
     {
-        <# Routine tasks #>
-
+        Write-Serialization -DestinationPath $DestinationPath
     }
-
 
 }
 
@@ -279,5 +281,5 @@ class Constants {
     $PathRegexPattern = "(^/[a-z0-9\s]+)(/[a-z0-9-\s]+)*([a-z0-9\s])$"
 
     static [System.Collections.Hashtable]
-    $UTF16Characters = @{Comma = '\u002C'}
+    $Delimiter = @{Default = [System.Char]0x002C}
 }
