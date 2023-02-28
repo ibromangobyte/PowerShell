@@ -179,7 +179,7 @@ function Read-Serialization {
     [System.Collections.ArrayList] 
     $serializationItems = [System.Collections.ArrayList]@()
 
-    Get-ChildItem -Path $SourcePath -Filter $Filter -Recurse | ForEach -Parallel {
+    Get-ChildItem -Path $SourcePath -Filter $Filter -Recurse | ForEach-Object {
         
         Write-Information "Reading serialization file at $($_.Directory.FullName) ..." -InformationAction Continue
         
@@ -190,7 +190,7 @@ function Read-Serialization {
         $serializationModule = [SerializationModule]::new($configurationElement.Name, $configurationElement.Dependencies)
 
 
-        [System.Object[]] $configurationElement.Predicate.Include | ForEach -Parallel {
+        [System.Object[]] $configurationElement.Predicate.Include | ForEach-Object {
                     
             [SerializationItem] 
             $serializationItem = [SerializationItem]::new($_.Name, $_.Path, $_.Database)
