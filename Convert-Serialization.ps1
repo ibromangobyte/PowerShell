@@ -276,7 +276,7 @@ function Write-Serialization {
 
     Write-Information "Writing serialization file to $($DestinationPath)..." -InformationAction Continue
 
-    [System.Collections.ArrayList] $Items | ForEach-Object {
+    [System.Collections.ArrayList] $SerializationItems | ForEach-Object {
         
         $serializationObject = New-Object -TypeName PSObject
         
