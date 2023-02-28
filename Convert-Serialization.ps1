@@ -260,7 +260,7 @@ function Write-Serialization {
             $serializationPredicate | Add-Member -MemberType NoteProperty -Name name -Value $SerializationItems.Name
             $serializationPredicate | Add-Member -MemberType NoteProperty -Name path -Value $SerializationItems.Path
             $serializationPredicate | Add-Member -MemberType NoteProperty -Name database -Value $SerializationItems.Database
-            $serializationPredicate | Add-Member -MemberType NoteProperty -Name database -Value $SerializationItems.Database
+            $serializationPredicate | Add-Member -MemberType NoteProperty -Name scope -Value $SerializationItems.Scope
 
             $serializationItems.Add($serializationPredicate)
         }
