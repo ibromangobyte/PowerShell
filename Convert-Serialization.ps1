@@ -80,6 +80,16 @@ class SerializationItem {
         $this.Rules = $rules
     }
 
+    [System.String] GetScope([System.Enum] $scope)
+    {
+        switch ($scope)
+        {
+            {($scope -band [Scope]::Descendants) -eq [Scope]::Descendants}
+                {}
+        }
+
+    }
+
     [System.Boolean] IsValidPath([System.String] $path)
     {
         if ($null -ne $path)
@@ -159,6 +169,7 @@ class SerializationModule {
     }
 }
 
+
 function Read-Serialization {
     param (
         [Parameter(Mandatory=$true,
@@ -228,15 +239,34 @@ function Write-Serialization {
                    ParameterSetName='Path')]
         [ValidateNotNullOrEmpty()]
         [System.Collections.ArrayList]
-        $Items
+        $SerializationItems
     )
 
     Write-Information "Writing serialization file to $($DestinationPath)..." -InformationAction Continue
 
     [System.Collections.ArrayList] $Items | ForEach-Object {
         
-    }
+        $serializationObject = New-Object -TypeName PSObject
+        
+        $serializationObject | Add-Member -MemberType NoteProperty -Name namespace -Value $SerializationItems.Namespace
+        $serializationObject | Add-Member -MemberType NoteProperty -Name references -Value $SerializationItems.References
 
+        $serializationItems = New-Object -TypeName System.Collections.ArrayList
+
+        foreach ($item in $SerializationItems.Items)
+        {
+            $serializationPredicate = New-Object -TypeName PSObject
+
+            $serializationPredicate | Add-Member -MemberType NoteProperty -Name name -Value $SerializationItems.Name
+            $serializationPredicate | Add-Member -MemberType NoteProperty -Name path -Value $SerializationItems.Path
+            $serializationPredicate | Add-Member -MemberType NoteProperty -Name database -Value $SerializationItems.Database
+            $serializationPredicate | Add-Member -MemberType NoteProperty -Name database -Value $SerializationItems.Database
+
+            $serializationItems.Add($serializationPredicate)
+        }
+
+
+    }
 }
 
 
@@ -275,13 +305,13 @@ function Convert-Serialization {
 
         try
         {
-            if (-not [bool](Resolve-Path -Path "/vffgfdg" -ErrorAction Ignore))
+            if (-not [bool](Resolve-Path -Path $SourcePath -ErrorAction Ignore))
             {
-                throw (New-Object -TypeName System.IO.DirectoryNotFoundException -ArgumentList "Could not find path: $("/vffgfdg")")
+                throw (New-Object -TypeName System.IO.DirectoryNotFoundException -ArgumentList "Could not find path: $($SourcePath)")
             }
-            if (-not [bool](Resolve-Path -Path "/vffgfdg" -ErrorAction Ignore))
+            if (-not [bool](Resolve-Path -Path $DestinationPath -ErrorAction Ignore))
             {
-                throw (New-Object -TypeName System.IO.DirectoryNotFoundException -ArgumentList "Could not find path: $("/vffgfdg")")
+                throw (New-Object -TypeName System.IO.DirectoryNotFoundException -ArgumentList "Could not find path: $($DestinationPath)")
             }
 
         }
