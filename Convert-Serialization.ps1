@@ -80,13 +80,45 @@ class SerializationItem {
         $this.Rules = $rules
     }
 
-    [System.String] GetScope([System.Enum] $scope)
+    [System.String] GetScope([System.Enum] $scopeEnum)
     {
-        switch ($scope)
+        [System.String]
+        $scopeString = [System.String]::Empty
+
+        switch ($scopeEnum)
         {
-            {($scope -band [Scope]::Descendants) -eq [Scope]::Descendants}
-                {}
+            {($scopeEnum) -eq [Scope]::Item}
+            {
+                $scopeString = "Ignored"
+                break
+            }
+            {($scopeEnum) -eq [Scope]::Item}
+            {
+                $scopeString = "SingleItem"
+                break
+            }
+            {($scopeEnum) -eq [Scope]::Descendants}
+            {
+                $scopeString = "DescendantsOnly"
+                break
+            }
+            {(($scopeEnum -band [Scope]::Descendants) -eq [Scope]::Descendants) -and  (($scopeEnum -band [Scope]::Item) -eq [Scope]::Item)}
+            {
+                $scopeString = "ItemAndDescendants"
+                break
+            }
+            {(($scopeEnum -band [Scope]::Children) -eq [Scope]::Children) -and  (($scopeEnum -band [Scope]::Item) -eq [Scope]::Item)}
+            {
+                $scopeString = "ItemAndChildren"
+                break
+            }
+            default
+            {
+                $scopeString = "SingleItem"
+            }
         }
+
+        return $scopeString
 
     }
 
@@ -260,6 +292,11 @@ function Write-Serialization {
             $serializationPredicate | Add-Member -MemberType NoteProperty -Name name -Value $SerializationItems.Name
             $serializationPredicate | Add-Member -MemberType NoteProperty -Name path -Value $SerializationItems.Path
             $serializationPredicate | Add-Member -MemberType NoteProperty -Name database -Value $SerializationItems.Database
+            
+            if ($null -ne $serializationItemms.Scope)
+            {
+                [System.Enum]::
+            }
             $serializationPredicate | Add-Member -MemberType NoteProperty -Name scope -Value $SerializationItems.Scope
 
             $serializationItems.Add($serializationPredicate)
@@ -317,7 +354,7 @@ function Convert-Serialization {
         }
         catch [System.IO.DirectoryNotFoundException]
         {
-            Write-Error "The source path or file was not found: $($PSItem.Exception)" -RecommendedAction "Enter valid path." -ErrorAction Stop
+            Write-Error "The path or file was not found: $($PSItem.Exception)" -RecommendedAction "Enter valid path." -ErrorAction Stop
         }
 
     }
