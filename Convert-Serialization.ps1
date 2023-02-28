@@ -51,7 +51,7 @@ class SerializationItem {
     $Scope
 
     [System.Collections.ArrayList]
-    $Rules = @()
+    $Rules = [System.Collections.ArrayList]@()
 
     SerializationItem(){}
     
@@ -131,21 +131,21 @@ class SerializationRules {
 
 class SerializationModule {
         
-    [System.Object]
+    [System.String]
     $Namespace
     
     [System.Collections.ArrayList]
-    $References = @()
+    $References = [System.Collections.ArrayList]@()
 
     [System.Collections.ArrayList]
-    $Items = @()
+    $Items = [System.Collections.ArrayList]@()
     
     SerializationModule(){}
     
-    SerializationModule([System.String] $namespace, [System.Collections.ArrayList] $references)
+    SerializationModule([System.String] $namespace, [System.String] $references)
     {
         $this.Namespace = $namespace
-        $this.References = $references
+        $this.References = $references.Split([Constants]::UTF16Characters.Comma)
     }
     
     [System.Boolean] IsNotNullAndEmpty([System.Collections.ArrayList] $items)
@@ -176,13 +176,32 @@ function Read-Serialization {
         $Filter
     )
 
+    [System.Collections.ArrayList] 
+    $configurationFiles = [System.Collections.ArrayList]@()
+
     Get-ChildItem -Path $SourcePath -Filter $Filter -Recurse | ForEach -Parallel {
         
         Write-Information "Reading serialization file at $($_.Directory.FullName) ..." -InformationAction Continue
         
-        $configurationNode = (Select-Xml -Path $SourcePath -XPath /configuration/descendant::configuration).Node
+        [System.Xml.XmlElement] 
+        $configurationElement = (Select-Xml -Path $_.FullName -XPath /configuration/descendant::configuration).Node
 
-        Write-Output $configurationNode.predicate
+        [SerializationModule] 
+        $serializationModule = [SerializationModule]::new($configurationElement.Name, $configurationElement.Dependencies)
+
+
+        [System.Object[]] $configurationElement.Predicate.Include | ForEach -Parallel {
+                    
+            [SerializationItem] 
+            $serializationItem = [SerializationItem]::new($_.Name, $_.Path, $_.Database)
+             
+            [System.Collections.ArrayList] 
+            $serializationModule.Items.Add($serializationItem)
+        
+        }
+
+        [System.Collections.ArrayList] 
+        $configurationFiles.Add($serializationModule)
 
     }
 
@@ -258,4 +277,7 @@ class Constants {
     
     static [System.String] 
     $PathRegexPattern = "(^/[a-z0-9\s]+)(/[a-z0-9-\s]+)*([a-z0-9\s])$"
+
+    static [System.Collections.Hashtable]
+    $UTF16Characters = @{Comma = '\u002C'}
 }
