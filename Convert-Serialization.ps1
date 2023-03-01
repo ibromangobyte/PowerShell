@@ -181,6 +181,9 @@ class SerializationModule {
 
     [System.Collections.ArrayList]
     $Items = [System.Collections.ArrayList]@()
+
+    [System.String]
+    $FileProperties
     
     SerializationModule(){}
     
@@ -199,6 +202,34 @@ class SerializationModule {
 
         return $false;
     }
+}
+
+class FileExtensions {
+
+    [System.String]
+    $Name
+
+    [System.String]
+    $FullName
+
+    [System.String]
+    $DirectoryName
+    
+    FileExtensions(){}
+    
+    FileExtensions([System.String] $name, [System.String] $fullName, [System.String] $directoryName)
+    {
+        $this.Name = $name
+        $this.FullName = $fullName
+        $this.DirectoryName = $directoryName
+    }
+
+    static [System.String] CreateFileName([System.String] $name, [System.String] $fullName)
+    {
+        
+        return (Split-Path -Parent $fullName) + "\" + ($name -replace ".config", ".json")
+    }
+    
 }
 
 
@@ -232,6 +263,8 @@ function Read-Serialization {
         [SerializationModule] 
         $serializationModule = [SerializationModule]::new($configurationElement.Name, $configurationElement.Dependencies)
 
+        [SerializationModule]
+        $serializationModule.FileProperties = [FileExtensions]::CreateFileName($_.Name, $_.FullName, $_.DirectoryName)
 
         [System.Object[]] $configurationElement.Predicate.Include | ForEach-Object {
                     
@@ -278,14 +311,15 @@ function Write-Serialization {
         $SerializationItems
     )
 
-    Write-Information "Writing serialization file to $($DestinationPath)..." -InformationAction Continue
+    Write-Information "Writing serialization file(s) to $($DestinationPath)..." -InformationAction Continue
 
     [System.Collections.ArrayList] $SerializationItems | ForEach-Object {
         
         $serializationObject = New-Object -TypeName PSObject
         
-        $serializationObject | Add-Member -MemberType NoteProperty -Name namespace -Value $SerializationItems.Namespace
-        $serializationObject | Add-Member -MemberType NoteProperty -Name references -Value $SerializationItems.References
+        $serializationObject | Add-Member -MemberType NoteProperty -Name namespace -Value $_.Namespace
+
+        $serializationObject | Add-Member -MemberType NoteProperty -Name references -Value $_.References
 
         $serializationItems = New-Object -TypeName System.Collections.ArrayList
 
@@ -293,17 +327,25 @@ function Write-Serialization {
         {
             $serializationItem = New-Object -TypeName PSObject
 
-            $serializationItem | Add-Member -MemberType NoteProperty -Name name -Value $SerializationItems.Name
-            $serializationItem | Add-Member -MemberType NoteProperty -Name path -Value $SerializationItems.Path
-            $serializationItem | Add-Member -MemberType NoteProperty -Name database -Value $SerializationItems.Database
+            $serializationItem | Add-Member -MemberType NoteProperty -Name name -Value $_.Name
+            $serializationItem | Add-Member -MemberType NoteProperty -Name path -Value $_.Path
+            $serializationItem | Add-Member -MemberType NoteProperty -Name database -Value $_.Database
             
-            if ($null -ne $serializationItems.Scope)
+            if ($null -ne $_.Scope)
             {
-                $serializationItem | Add-Member -MemberType NoteProperty -Name scope -Value [SerializationItem]::GetScope($SerializationItems.Scope)
+                $serializationItem | Add-Member -MemberType NoteProperty -Name scope -Value [SerializationItem]::GetScope($_.Scope)
             }
 
             $serializationItems.Add($serializationItem)
         }
+        
+        $serializationPredicates = New-Object -TypeName PSObject
+
+        $serializationPredicates | Add-Member -MemberType NoteProperty -Name includes -Value $serializationItems
+
+        $serializationObject | Add-Member -MemberType NoteProperty -Name items -Value $serializationPredicates
+
+        $serializationObject | ConvertTo-Json -Depth 5 | Out-File $_.FileProperties
     }
 }
 
@@ -334,7 +376,6 @@ function Convert-Serialization {
         [ValidateNotNullOrEmpty]
         [System.String]
         $Filter
-
     )
 
     begin 
