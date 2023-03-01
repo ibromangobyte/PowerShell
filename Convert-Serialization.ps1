@@ -1,7 +1,7 @@
 <#
 
 .SYNOPSIS
-Automates the configuration of content serialization configuration files.
+Automates the conversion of serialization configuration files to Sitecore Content Serialization configuration files.
 
 .DESCRIPTION
 Reads Unicorn XML configuration files and converts them into SCS-compliant configuration files.
