@@ -304,8 +304,6 @@ function Write-Serialization {
 
             $serializationItems.Add($serializationItem)
         }
-
-
     }
 }
 
