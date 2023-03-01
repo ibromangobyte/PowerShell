@@ -1,2 +1,2 @@
 # PowerShell Repository
-> PowerShell scripts make use of multi-threading and is compatible with PowerShell version 7 and above.
+> PowerShell scripts does not make use of multi-threading and is compatible with PowerShell version 5 and above.
