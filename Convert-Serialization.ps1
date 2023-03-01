@@ -80,14 +80,14 @@ class SerializationItem {
         $this.Rules = $rules
     }
 
-    [System.String] GetScope([System.Enum] $scopeEnum)
+    static [System.String] GetScope([System.Enum] $scopeEnum)
     {
         [System.String]
         $scopeString = [System.String]::Empty
 
         switch ($scopeEnum)
         {
-            {($scopeEnum) -eq [Scope]::Item}
+            {($scopeEnum) -eq [Scope]::Ignored}
             {
                 $scopeString = "Ignored"
                 break
@@ -114,7 +114,7 @@ class SerializationItem {
             }
             default
             {
-                $scopeString = "SingleItem"
+                $scopeString = "ItemAndDescendants"
             }
         }
 
@@ -242,6 +242,10 @@ function Read-Serialization {
             {
                 $serializationItem.Scope = [Scope]::Item
             }
+            else
+            {
+                $serializationItem.Scope = [EnumExtensions]::Add([System.Int32] [Scope]::Item, [System.Int32] [Scope]::Descendants)
+            }
              
             [System.Collections.ArrayList] 
             $serializationModule.Items.Add($serializationItem)
@@ -293,11 +297,10 @@ function Write-Serialization {
             $serializationPredicate | Add-Member -MemberType NoteProperty -Name path -Value $SerializationItems.Path
             $serializationPredicate | Add-Member -MemberType NoteProperty -Name database -Value $SerializationItems.Database
             
-            if ($null -ne $serializationItemms.Scope)
+            if ($null -ne $serializationItems.Scope)
             {
-                [System.Enum]::
+                $serializationPredicate | Add-Member -MemberType NoteProperty -Name scope -Value [SerializationItem]::GetScope($SerializationItems.Scope)
             }
-            $serializationPredicate | Add-Member -MemberType NoteProperty -Name scope -Value $SerializationItems.Scope
 
             $serializationItems.Add($serializationPredicate)
         }
