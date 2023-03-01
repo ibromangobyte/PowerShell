@@ -291,18 +291,18 @@ function Write-Serialization {
 
         foreach ($item in $SerializationItems.Items)
         {
-            $serializationPredicate = New-Object -TypeName PSObject
+            $serializationItem = New-Object -TypeName PSObject
 
-            $serializationPredicate | Add-Member -MemberType NoteProperty -Name name -Value $SerializationItems.Name
-            $serializationPredicate | Add-Member -MemberType NoteProperty -Name path -Value $SerializationItems.Path
-            $serializationPredicate | Add-Member -MemberType NoteProperty -Name database -Value $SerializationItems.Database
+            $serializationItem | Add-Member -MemberType NoteProperty -Name name -Value $SerializationItems.Name
+            $serializationItem | Add-Member -MemberType NoteProperty -Name path -Value $SerializationItems.Path
+            $serializationItem | Add-Member -MemberType NoteProperty -Name database -Value $SerializationItems.Database
             
             if ($null -ne $serializationItems.Scope)
             {
-                $serializationPredicate | Add-Member -MemberType NoteProperty -Name scope -Value [SerializationItem]::GetScope($SerializationItems.Scope)
+                $serializationItem | Add-Member -MemberType NoteProperty -Name scope -Value [SerializationItem]::GetScope($SerializationItems.Scope)
             }
 
-            $serializationItems.Add($serializationPredicate)
+            $serializationItems.Add($serializationItem)
         }
 
 
