@@ -226,7 +226,6 @@ class FileExtensions {
 
     static [System.String] CreateFileName([System.String] $name, [System.String] $fullName)
     {
-        
         return (Split-Path -Parent $fullName) + "\" + ($name -replace ".config", ".json")
     }
     
@@ -263,7 +262,6 @@ function Read-Serialization {
         [SerializationModule] 
         $serializationModule = [SerializationModule]::new($configurationElement.Name, $configurationElement.Dependencies)
 
-        [SerializationModule]
         $serializationModule.FileProperties = [FileExtensions]::CreateFileName($_.Name, $_.FullName, $_.DirectoryName)
 
         [System.Object[]] $configurationElement.Predicate.Include | ForEach-Object {
