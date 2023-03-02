@@ -411,7 +411,6 @@ function Convert-Serialization {
 
 }
 
-
 class Constants {
     
     static [System.String] 
